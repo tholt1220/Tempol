@@ -15,6 +15,7 @@
 // }
 
 
+
 function readFile(file)
 {
   let reader = new FileReader();
@@ -145,7 +146,7 @@ function loadAnimationFile()
   p.appendChild(txt);
   p.appendChild(img);
   disableClick();
-
+  ping();
 }
 
 
@@ -163,6 +164,7 @@ function loadAnimationYT()
   p.appendChild(txt);
   p.appendChild(img);
   disableClick();
+  ping();
 }
 
 function loadAnimationConvert()
@@ -179,6 +181,7 @@ function loadAnimationConvert()
   p.appendChild(txt);
   p.appendChild(img);
   disableClick();
+  ping();
 }
 
 
@@ -188,3 +191,20 @@ function disableClick()
   b.style.pointerEvents = "None";
 }
 
+
+function ping()
+{
+  var p = new Ping();
+
+  console.log("PINGING");
+  p.ping("/", function(err, data) {
+    if (err) {
+      console.log("error loading resource")
+      data = data + " " + err;
+      return;
+    }
+    console.log(data);
+  });
+
+  // setTimeout(ping, 10*1000); //do every 10 seconds
+}

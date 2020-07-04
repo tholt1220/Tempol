@@ -1,0 +1,19 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<h5>Step 1 Complete! Calculated Tempo for {{songName}}: {{"%.2f" | format(tempo|float)}} bpm</h5>
+<h4>Step 2: Choose a new tempo</h4>
+<div class="container">
+    <form name = "targetTempo" action ='/convert' method ="POST" onsubmit="loadAnimationConvert()">    
+      <div class ="form-group">
+        <label for = "targetBPM">New Tempo:</label>
+        <input id = "targetBPM" class = "form-control text-center" step="any" type="number" name = "target" value = {{"%.2f" | format(tempo|float)}}>
+      </div>
+      <input id = "filepath" name = "filepath" value = {{filepath}} style="visibility: hidden; display: none;">
+      <input id = "original_tempo" name = "original_tempo" value = {{tempo}} style="visibility: hidden; display: none;">
+      <input id = "filename" name = "filename" value = {{filename}} style="visibility: hidden; display: none;">
+      <input type = "text" id = "songname" name = "songname" value = "{{songName}}" style="visibility: hidden; display: none;">        
+      <input type="submit" value = "Convert my file!" class="btn btn-outline-primary btn-lg" id ="submit_button">
+  </form>
+  </div>
+{% endblock %}

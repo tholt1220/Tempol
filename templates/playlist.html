@@ -1,0 +1,46 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+    <h3>Current Playlist</h3>
+    <p>Use playlists for practice sessions! Click the button in the upper left corner to show your current playlist.</p>
+    <br>
+    <table id = "playlist_table" class="table table-sm container" style="width: 100%;">
+        {% for song in playlist %}
+            <tr class="d-flex">
+                <td class="col-2">
+                    <button onclick="var trackNum = {{song['trackNumber']}}; songUp(trackNum);" class="btn btn-link" title="Up">
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
+                        </svg>
+                    </button>
+                    <button onclick="var trackNum = {{song['trackNumber']}} + 1; songUp(trackNum);" class="btn btn-link" title="Down">
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                    </button>
+                </td>
+                <td class = "col-1" style="text-align: right; font-weight:bold;">{{song['trackNumber']}}.  </td>
+                <td class ="col-3 align-middle">{{song['title']}}</td> 
+                <td class = "col-3 align-middle">{{song['tempo']}} BPM </td>
+                <td class = "col-3 align-middle">
+                    <button onclick="var songId = {{song['id']}}; duplicateSong(songId);" class="btn btn-link" title="Duplicate">
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-plus" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M8 3.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z"/>
+                            <path fill-rule="evenodd" d="M7.5 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8z"/>
+                          </svg>
+                    </button>
+                    <button onclick="var songId = {{song['id']}}; deleteSong(songId);" class="btn btn-link" title="Delete">
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708-.708l7-7a.5.5 0 0 1 .708 0z"/>
+                            <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708l-7-7a.5.5 0 0 0-.708 0z"/>
+                          </svg>
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <form action="/" method ='GET'>
+        <input type ="submit" value = "Add Another Song" class="btn btn-outline-primary">
+    </form>
+{% endblock %}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tempol</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CSS only -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <!-- JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename = 'index.js') }}"></script>
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename = 'index.css') }}"/>
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename = 'loading-bar.css') }}"/>
+  <script type="text/javascript" src="{{url_for('static', filename = 'loading-bar.js') }}"></script>
+  <script type="text/javascript" src="{{url_for('static', filename = 'playlist.js') }}"></script>
+
+  <!-- Custom styles for this template -->
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename = 'sidebar.css') }}"/>
+  <script src="https://cdn.plyr.io/3.6.2/plyr.js"></script>
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.6.2/plyr.css">
+
+
+
+  </head>
+  <body class="text-center">
+    <div class="d-flex toggled" id="wrapper">
+
+      <!-- Sidebar -->
+      <div class="bg-light border-right" id="sidebar-wrapper">
+        <div class="sidebar-heading"><h3>Playlist</h3></div>
+        <div class="list-group list-group-flush">
+            <div class="container">
+              <div class="column add-bottom">
+                  <div id="mainwrap">
+                      <div id="nowPlay">
+                          <span id="npAction">Paused...</span><span id="npTitle"></span>
+                      </div>
+                      <div id="audiowrap">
+                          <div id="audio0">
+                              <audio id="audio1" preload controls>Your browser does not support HTML5 Audio! 😢</audio>
+                          </div>
+                          <div id="tracks">
+                              <a id="btnPrev">&vltri;</a><a id="btnNext">&vrtri;</a>
+                          </div>
+                      </div>
+                      <div id="plwrap">
+                          <ul id="plList">
+                          </ul>
+                      </div>
+                      <form action="/playlist" method ='GET'>
+                        <input type ="submit" value = "Edit Playlist" class="btn btn-outline-primary">
+                      </form>
+                  </div>
+              </div>
+          </div>        
+        </div>
+      </div>
+      <!-- /#sidebar-wrapper -->
+  
+      <!-- Page Content -->
+      <div id="page-content-wrapper">
+  
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: cornflowerblue;">
+          <button class="btn btn-outline-light" id="menu-toggle">Playlist</button>
+        </nav>
+  
+        <div class="main-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+          <h1 class="display-4">Tempol</h1>
+          <p class="lead" style="color: whitesmoke;">A tool used to convert any song to a specific tempo in just two steps!
+            Tempol is designed as a practice tool for musicians that enjoy playing along with their favorite songs, but feel that the tempo is 
+            a little too fast or slow for comfort.
+          </p>
+        </div>
+    
+        {% block content %} {% endblock %}
+    
+      <!-- /#page-content-wrapper -->
+  
+    </div>
+    <!-- /#wrapper -->
+  
+    <!-- Menu Toggle Script -->
+    <script>
+      $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+      });
+    </script>
+  
+    
+  
+  </body>
+</html>

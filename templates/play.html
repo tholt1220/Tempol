@@ -1,0 +1,25 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+    {% if filetype == "mp3" or filetype == "webm" %}
+        {% set html_filetype= 'audio/mpeg' %}
+    {% elif filetype == "wav"%}
+        {% set html_filetype= 'audio/wav' %}
+    {% endif %}
+    <h4>All Done! Here's {{songname}} at {{tempo}} BPM:</h4>
+    <audio controls id = "playAudio">
+        <source src = ../{{new_filename}} type = {{html_filetype}}>
+    </audio>
+
+    <p>Use the playlist feature for practice sessions!</p>
+
+
+    <form action="/playlistCRUD" method ='POST'>
+        <input id = "tempo" type ='number' name = "tempo" value = {{tempo}} style="visibility: hidden; display: none;">
+        <input id = "title" name = "title" value = "{{songname}}" style="visibility: hidden; display: none;">
+        <input id = "filename" name = "filename" value = {{new_filename}} style="visibility: hidden; display: none;">
+        <input id = "filetype" name = "filetype" value = {{html_filetype}} style="visibility: hidden; display: none;">
+        <input type="submit" value="Add {{songname}} to Playlist" class="btn btn-outline-primary btn-lg">
+    </form>
+
+{% endblock %}

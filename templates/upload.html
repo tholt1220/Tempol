@@ -1,0 +1,63 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+    <h4>Step 1: Upload a song and get automatically get its tempo!</h4>
+    <div class = "container">
+    <div class="row">
+      <div class ="col-sm-5">
+        <button type = "button" id = "fileButton" class ="btn btn-light btn-block">Upload File</button>
+      </div>
+      <div class = "col-sm-2">
+        <p>OR</p>
+      </div>
+      <div class ="col-sm-5">
+        <button type = "button" id = "ytButton" class = "btn btn-light btn-block">Upload From YouTube</button>
+      </div>
+    </div>
+
+    <div id = "file_div">
+      <form name = "uploadFile" enctype="multipart/form-data" action = '/upload' method="POST" onsubmit="loadAnimationFile()"> 
+        <label class="w-100">Input an mp3 or wav file:
+          <div class = "custom-file">
+            <label class = "custom-file-label" for = "uploadInput">No File Selected</label>
+            <input id="uploadInput" class ="custom-file-input" type="file" name="file" accept=".mp3,.wav" required>
+          </div>
+        </label>
+        <div class ="form-group">
+          <label for = "songName">Song Title:</label>
+          <input name="songName" class="form-control text-center" type ="text">
+          <small id="emailHelp" class="form-text text-muted">This is the name that will be displayed in your practice playlist</small>
+        </div>
+        <div>
+          <input name = "uploadFile" type="submit" value="Track Tempo" class="btn btn-outline-primary btn-lg" id = "submit_buttonFile">
+        </div>
+      </form>
+    </div>
+
+    <script>
+      // Add the following code if you want the name of the file appear on select
+      $(".custom-file-input").on("change", function() {
+        var fileName = $(this).val().split("\\").pop();
+        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+      });
+      </script>
+
+
+    <div id = "youtube_div">
+      <form name = "uploadYT" enctype="multipart/form-data" action = '/upload' method="POST" onsubmit="loadAnimationYT()"> 
+        <div class = "form-group">
+          <label for ="link">Input a youtube link:</label>
+          <input id="link" class ="form-control text-center" type="url" name="link" required>
+        </div>
+        <div class ="form-group">
+          <label for = "songName">Song Title:</label>
+          <input name ="songName" class="form-control text-center" type ="text">
+          <small id="emailHelp" class="form-text text-muted">This is the name that will be displayed in your practice playlist</small>
+        </div>
+        <div>
+          <input name = "uploadYT" type="submit" value="Track Tempo" class="btn btn-outline-primary btn-lg" id ="submit_buttonYT">
+        </div>
+      </form>
+    </div>
+    </div>
+{% endblock %}

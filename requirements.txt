@@ -1,7 +1,7 @@
 flask
 werkzeug
 youtube_dl
-
+gunicorn
 librosa
 pydub
 ffmpeg

@@ -1,7 +1,5 @@
 flask
-werkzeug.utils
-pathlib
-json
+werkzeug
 youtube_dl
 
 librosa

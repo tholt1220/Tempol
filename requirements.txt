@@ -6,3 +6,4 @@ librosa
 numba==0.45.1
 pydub
 ffmpeg
+llvmlite==0.32.1

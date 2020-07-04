@@ -6,8 +6,6 @@ from werkzeug.utils import secure_filename
 from pathlib import Path
 import json
 import youtube_dl
-from database.db import initialize_db
-from database.models import Song
 
 upload_folder = 'uploads'
 allowed_extensions = {'mp3', 'wav'}

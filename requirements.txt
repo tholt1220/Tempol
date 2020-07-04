@@ -5,6 +5,6 @@ gunicorn
 librosa
 numba==0.45.1
 pydub
-ffmpeg
+ffmpeg-python
 llvmlite==0.32.1
 soundfile

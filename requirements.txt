@@ -3,5 +3,6 @@ werkzeug
 youtube_dl
 gunicorn
 librosa
+numba==0.45.1
 pydub
 ffmpeg

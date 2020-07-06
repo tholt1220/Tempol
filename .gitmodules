@@ -1,0 +1,3 @@
+[submodule "plyr"] 
+   path =  plyr
+   url = git://https://github.com/sampotts/plyr.git

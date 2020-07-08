@@ -3,7 +3,7 @@ werkzeug
 youtube_dl
 gunicorn
 librosa==0.7.1
-numba==0.45.1
+numba==0.48.0
 pydub
 ffmpeg-python
 llvmlite==0.32.1

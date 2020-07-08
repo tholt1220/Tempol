@@ -2,7 +2,7 @@ flask
 werkzeug
 youtube_dl
 gunicorn
-librosa
+librosa==0.7.1
 numba==0.45.1
 pydub
 ffmpeg-python

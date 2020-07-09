@@ -6,11 +6,13 @@ from werkzeug.utils import secure_filename
 from pathlib import Path
 import json
 import youtube_dl
+import boto3
 
 upload_folder = 'uploads'
 allowed_extensions = {'mp3', 'wav'}
 application = Flask(__name__, template_folder='templates')
 application.config['upload_folder'] = upload_folder
+BUCKET = "elasticbeanstalk-us-west-1-064202757067"
 application.secret_key = 'secret key'
 
 def filetype(filename):
@@ -165,6 +167,7 @@ def upload():
 				flash('file selected')
 				filename = secure_filename(file.filename)
 				file.save(os.path.join(application.config['upload_folder'], filename))
+				upload_file(f"uploads/{file.filename}", BUCKET)
 				filepath = os.path.join(application.config['upload_folder'], filename)
 		elif 'uploadYT' in request.form:
 			filename, filepath =  downloadLink(request.form['link'])
@@ -248,6 +251,18 @@ def main():
 			print(session['playlist'])
 			print(session['songCounter'])
 		return render_template('upload.html')
+
+def upload_file(file_name, bucket):
+    """
+    Function to upload a file to an S3 bucket
+    """
+    object_name = file_name
+    s3_client = boto3.client('s3')
+    response = s3_client.upload_file(file_name, bucket, object_name)
+
+    return response
+
+
 
 if __name__ == '__main__':
     application.run()

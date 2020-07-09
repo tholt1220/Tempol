@@ -166,8 +166,8 @@ def upload():
 			if file and allowed_file(file.filename):
 				flash('file selected')
 				filename = secure_filename(file.filename)
-				file.save(os.path.join(application.config['upload_folder'], filename))
-				upload_file(f"uploads/{file.filename}", BUCKET)
+				# file.save(os.path.join(application.config['upload_folder'], filename))
+				upload_file(f"uploads/{file.filename}", BUCKET) #upload to AWS using boto3
 				filepath = os.path.join(application.config['upload_folder'], filename)
 		elif 'uploadYT' in request.form:
 			filename, filepath =  downloadLink(request.form['link'])

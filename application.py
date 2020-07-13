@@ -7,13 +7,20 @@ from pathlib import Path
 import json
 import youtube_dl
 import boto3
+from config import S3_KEY, S3_SECRET, S3_BUCKET
 
 upload_folder = 'uploads'
 allowed_extensions = {'mp3', 'wav'}
 application = Flask(__name__, template_folder='templates')
 application.config['upload_folder'] = upload_folder
-BUCKET = "elasticbeanstalk-us-west-1-064202757067"
 application.secret_key = 'secret key'
+
+application.config.from_object("config")
+s3 = boto3.client(
+   "s3",
+   aws_access_key_id=S3_KEY,
+   aws_secret_access_key=S3_SECRET
+)
 
 def filetype(filename):
 	return filename.rsplit('.', 1)[1].lower()
@@ -165,10 +172,15 @@ def upload():
 				return redirect(request.url)
 			if file and allowed_file(file.filename):
 				flash('file selected')
-				filename = secure_filename(file.filename)
-				# file.save(os.path.join(application.config['upload_folder'], filename))
-				upload_file(f"uploads/{file.filename}", BUCKET) #upload to AWS using boto3
-				filepath = os.path.join(application.config['upload_folder'], filename)
+				file.filename = secure_filename(file.filename)
+				filename = file.filename
+				#to upload to local machine:
+				#file.save(os.path.join(application.config['upload_folder'], filename)) 
+				#filepath = os.path.join(application.config['upload_folder'], filename)
+
+				#to upload to s3:
+				filepath = str(upload_file_to_s3(file, application.config["S3_BUCKET"]))
+
 		elif 'uploadYT' in request.form:
 			filename, filepath =  downloadLink(request.form['link'])
 			if filename is None:
@@ -252,17 +264,26 @@ def main():
 			print(session['songCounter'])
 		return render_template('upload.html')
 
-def upload_file(file_name, bucket):
-    """
-    Function to upload a file to an S3 bucket
-    """
-    object_name = file_name
-    s3_client = boto3.client('s3')
-    response = s3_client.upload_file(file_name, bucket, object_name)
+def upload_file_to_s3(file, bucket_name, acl="public-read"):
 
-    return response
+	try:
 
+		s3.upload_fileobj(
+			file,
+			bucket_name,
+			file.filename,
+			ExtraArgs={
+				"ACL": acl,
+				"ContentType": file.content_type
+			}
+		)
 
+	except Exception as e:
+		# This is a catch all exception, edit this part to fit your needs.
+		print("Something Happened: ", e)
+		return e
+
+	return "{}{}".format(application.config["S3_LOCATION"], file.filename)
 
 if __name__ == '__main__':
     application.run()

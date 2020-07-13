@@ -5,6 +5,11 @@ import sys
 from pathlib import Path
 import ffmpeg
 
+import soundfile as sf
+import io
+from urllib.request import urlopen
+
+
 #     argc = len(sys.argv)
 #     if argc == 1:
 #         print("Error: No file given")
@@ -26,12 +31,19 @@ else:
 '''
 
 def calcluateBPM(src):
+	print(src)
 	# 2. Load the audio as a waveform `y`
 	#    Store the sampling rate as `sr`
+	
 	try:
-		y, sr = librosa.load(src)
-	except:
+		#read from local 
+		#y, sr = librosa.load(src)
+		#read from s3 URL
+		y, sr = sf.read(io.BytesIO(urlopen(src).read()))
+
+	except Exception as e :
 		print("Unable to find file")
+		print(e)
 		return 0
 
 	# 3. Run the default beat tracker

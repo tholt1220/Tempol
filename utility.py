@@ -3,11 +3,11 @@ import os
 from pydub import AudioSegment
 import sys
 import ffmpeg
-import ntpath
+# import ntpath
 
-import soundfile as sf
-import io
-from urllib.request import urlopen
+# import soundfile as sf
+# import io
+# from urllib.request import urlopen
 
 # from application import s3, application
 # from subprocess import Popen, PIPE

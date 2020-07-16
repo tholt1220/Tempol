@@ -8,7 +8,7 @@
     {% endif %}
     <h4>All Done! Here's {{songname}} at {{tempo}} BPM:</h4>
     <audio controls id = "playAudio">
-        <source src = ../{{new_filename}} type = {{html_filetype}}>
+        <source src = {{new_filename}} type = {{html_filetype}}>
     </audio>
 
     <p>Use the playlist feature for practice sessions!</p>

@@ -2,12 +2,15 @@ import librosa
 import os
 from pydub import AudioSegment
 import sys
-from pathlib import Path
 import ffmpeg
+import ntpath
 
 import soundfile as sf
 import io
 from urllib.request import urlopen
+from application import s3, application
+
+from subprocess import Popen, PIPE
 
 
 #     argc = len(sys.argv)
@@ -30,16 +33,43 @@ else:
     print("Error: only supports .mp3 or .wav types")
 '''
 
+bucket_name = application.config["S3_BUCKET"]
+
+
 def calcluateBPM(src):
-	print(src)
-	# 2. Load the audio as a waveform `y`
-	#    Store the sampling rate as `sr`
+	#soundfile only supports .wav
+	#SO convert .mp3 to .wav using ffmpeg
+	src_filename, src_filetype = os.path.splitext(src)
+	if src_filetype == '.mp3' or src_filetype ==".webm":
+		print("mp3 to wav:")
+		output, _ = (
+			ffmpeg.input(src)
+			.output('pipe:', format='wav')
+			.run(capture_stdout=True)
+		)
+
+		#upload .wav to s3 bucket
+		filename = ntpath.basename(src_filename) + ".wav"
+		print("uploading " + filename)
+		src = upload_bytes_to_s3(io.BytesIO(output), filename, bucket_name)
+
+		#delete .mp3 or .wav file from s3 bucket
+		src_filename = filename.replace(".wav", src_filetype)
+		delete_from_s3(src_filename, bucket_name)
+
 	
 	try:
 		#read from local 
-		#y, sr = librosa.load(src)
+		# y, sr = librosa.load(src)
+
 		#read from s3 URL
-		y, sr = sf.read(io.BytesIO(urlopen(src).read()))
+		audio_stream = io.BytesIO(urlopen(src).read())
+		audio_stream.seek(0)
+		y, sr = sf.read(audio_stream)
+		#soundfile may return shape (n,2), but librosa expects (n,)
+		if(y.shape[1] > 1):
+			#to_mono: (2,n) -> (n,)
+			y = librosa.to_mono(y.transpose())
 
 	except Exception as e :
 		print("Unable to find file")
@@ -72,23 +102,64 @@ def alterTempo(src, original_tempo, goal):
 	print("\nGoal Tempo: " + str(goal))
 	print("Altering tempo by factor of " + str(factor) + "...\n\n")
 
-
-	filename, filetype = os.path.splitext(src)
-	new_name = filename + "_" + floatToString(goal)
-
-	if os.path.isfile(new_name + filetype):
-		print(new_name + " is taken")
-		new_name = new_name + "_new" + filetype
-	else:
-		new_name = new_name + filetype
+	#local files
+	# filename, filetype = os.path.splitext(src)
+	# new_name = filename + "_" + floatToString(goal)
 	
-	input = ffmpeg.input(src)
-	input = ffmpeg.filter_(input, 'atempo', factor)
-	output = ffmpeg.output(input, new_name)
-	ffmpeg.run(output)
+	# if os.path.isfile(new_name + filetype):
+	# 	print(new_name + " is taken")
+	# 	new_name = new_name + "_new" + filetype
+	# else:
+	# 	new_name = new_name + filetype
+
+
+	# input = ffmpeg.input(src)
+	# input = ffmpeg.filter_(input, 'atempo', factor)
+	# output = ffmpeg.output(input, new_name)
+	# ffmpeg.run(output)
+
+	# # remove original file
+	# os.remove(src)
 	
-	#remove original file
-	os.remove(src)
+
+	#s3 bucket
+
+	#src_filename is of the form http://bucket-name.../name.wav
+	src_filename, filetype = os.path.splitext(src)
+	#name
+	src_filename = ntpath.basename(src_filename)
+	#name_120
+	filename = src_filename + "_" + floatToString(goal)
+
+	#if filename is already in the bucket, append "_new" to the end
+	s3_files = [file["Key"] for file in s3.list_objects(Bucket=bucket_name)["Contents"]]
+	while (filename + filetype) in s3_files:
+		filename += "_new"
+
+	#name_120.wav
+	filename += filetype
+	#name.wav
+	src_filename += filetype
+
+	print("FILENAME:" , filename)
+
+	#run ffmpeg in subprocess, feed stdout into output
+	output, _ = (
+		ffmpeg
+    	.input(src)
+		.filter_('atempo', factor)
+    	.output('pipe:', format='wav')
+    	.run(capture_stdout=True)
+	)
+
+	print("DONE PROCESSING")
+
+	#cast output as FileObj, send to s3 bucket, get new filename 
+	new_name = upload_bytes_to_s3(io.BytesIO(output), filename, bucket_name)
+	
+	#delete original file from s3 bucket
+	delete_from_s3(src_filename, application.config["S3_BUCKET"])
+	
 	return new_name
 
 def calcAndAlter(filename, targetBPM):
@@ -104,3 +175,35 @@ if __name__ == "__main__":
  	# calcAndAlter(sys.argv[1], sys.argv[2])
 	 pass
 
+def delete_from_s3(filename, bucketname):
+	try:
+		response = s3.delete_object(
+			Bucket = bucketname,
+			Key = filename
+		)
+		print("removed ", filename)
+	except Exception as e:
+		# This is a catch all exception, edit this part to fit your needs.
+		print("Something Happened: ", e)
+		return e
+	return
+
+
+def upload_bytes_to_s3(bytes, filename, bucket_name, acl="public-read"):
+	try:
+
+		s3.upload_fileobj(
+			bytes,
+			bucket_name,
+			filename,
+			ExtraArgs={
+				"ACL": acl
+			}
+		)
+
+	except Exception as e:
+		# This is a catch all exception, edit this part to fit your needs.
+		print("Something Happened: ", e)
+		return e
+
+	return "{}{}".format(application.config["S3_LOCATION"], filename)

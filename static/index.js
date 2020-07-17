@@ -158,7 +158,7 @@ function loadAnimationYT()
   img.className = "img-fluid";
   img.style.maxWidth = "20%";
 
-  var txt = document.createTextNode("Okay, Calculating Tempo...");
+  var txt = document.createTextNode("Okay, Calculating Tempo... (This might take a minute)");
   p.appendChild(txt);
   p.appendChild(img);
   disableClick();

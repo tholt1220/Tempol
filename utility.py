@@ -106,11 +106,11 @@ def alterTempo(src, original_tempo, goal):
 	filename, filetype = os.path.splitext(src)
 	new_name = filename + "_" + floatToString(goal)
 	
-	if os.path.isfile(new_name + filetype):
+	while os.path.isfile(new_name + filetype):
 		print(new_name + " is taken")
-		new_name = new_name + "_new" + filetype
-	else:
-		new_name = new_name + filetype
+		new_name += "_new"
+		
+	new_name += filetype
 
 	try:
 		input = ffmpeg.input(src)

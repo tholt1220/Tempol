@@ -195,6 +195,10 @@ def upload():
 
 
 		original_BPM = utility.calcluateBPM(filepath)
+		if original_BPM == 0:
+			return redirect(url_for('error'))
+
+
 		
 		print('HERE')
 		songName = request.form.get('songName')

@@ -193,7 +193,7 @@ def upload():
 			if filename is None:
 				return redirect(url_for('error'))
 
-
+		print(filepath)
 		original_BPM = utility.calcluateBPM(filepath)
 		if original_BPM == 0:
 			return redirect(url_for('error'))
@@ -266,7 +266,7 @@ def downloadLink(link):
 	try:
 		cmd = "youtube-dl -f 251 " + link + " -o -"
 		print(cmd)
-		proc = utility.Popen(cmd, stdout=utility.PIPE)
+		proc = utility.Popen([cmd], stdout=utility.PIPE, shell = True)
 		output, _ = proc.communicate()
 		with youtube_dl.YoutubeDL(ydl_opts) as ydl:
 			result = ydl.extract_info(link, download=False)

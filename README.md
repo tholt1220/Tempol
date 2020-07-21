@@ -11,6 +11,7 @@ Tempol is designed to run in a Dockerized Container or deployed to AWS elastic b
 
 ### Step 1: File upload
 Endpoint: `/upload`
+
 The first step is to upload a file. Users have the option to upload their own audio file (.mp3 or .wav) or input a link from YouTube (Tempol will use youtube-dl to extract the audio).
 Uploaded audio files are stored in
 * uploads folder (./uploads)
@@ -24,12 +25,15 @@ Note: If uploading to AWS, use soundfile instead of librosa (soundfile supports 
 
 ### Step 3: Alter Tempo
 Endpoint: `/convert`
+
 The calculated tempo from Step 2 is displayed to the user, and the user will input a new tempo to convert the file to. This is sent to `alterTempo()`
+
 Ffmpeg will speed up the original audio by a factor of `new_tempo / original_tempo`. For example, if the original tempo is 120 BPM and the desired tempo is 180 BPM, Ffmpeg will speed up the original audio by a factor of `180/120 = 1.5`
 The converted file is stored in the uploads foler (either locally or in s3 bucket). The filename will have the target tempo appended (eg. mysong.mp3 -> mysong_130.mp3)
 
 ### Step 4: Playlists
 Endpoint: `/playlistCRUD`
+
 Users can create a playlist of songs for practice sessions. Features:
 * Reorder (Move song up/down)
 * Duplicate 

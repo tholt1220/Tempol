@@ -18,14 +18,14 @@ application = Flask(__name__, template_folder='templates')
 application.config['upload_folder'] = upload_folder
 application.secret_key = 'secret key'
 
-application.config.from_object("config")
-s3 = boto3.client(
-   "s3",
-   aws_access_key_id=S3_KEY,
-   aws_secret_access_key=S3_SECRET
-)
+# application.config.from_object("config")
+# s3 = boto3.client(
+#    "s3",
+#    aws_access_key_id=S3_KEY,
+#    aws_secret_access_key=S3_SECRET
+# )
 
-bucket_name = application.config["S3_BUCKET"]
+# bucket_name = application.config["S3_BUCKET"]
 
 def filetype(filename):
 	return filename.rsplit('.', 1)[1].lower()
@@ -118,10 +118,10 @@ def deleteFile(filename):
 			return
 	#song is not used anywhere else, so delete it 
 	#filekey is the basename of the full s3 URL:
-	file_key = ntpath.basename(filename)
+	# file_key = ntpath.basename(filename)
 	try:
-		utility.delete_from_s3(file_key, application.config['S3_BUCKET'])
-		# os.remove(filename)
+		# utility.delete_from_s3(file_key, application.config['S3_BUCKET'])
+		os.remove(filename)
 	except:
 		print("unable to remove ")
 	
@@ -182,11 +182,11 @@ def upload():
 				file.filename = secure_filename(file.filename)
 				filename = file.filename
 				#to upload to local machine:
-				# file.save(os.path.join(application.config['upload_folder'], filename)) 
-				# filepath = os.path.join(application.config['upload_folder'], filename)
+				file.save(os.path.join(application.config['upload_folder'], filename)) 
+				filepath = os.path.join(application.config['upload_folder'], filename)
 
 				#to upload to s3:
-				filepath = str(upload_file_to_s3(file, bucket_name))
+				# filepath = str(upload_file_to_s3(file, bucket_name))
 
 		elif 'uploadYT' in request.form:
 			filename, filepath =  downloadLink(request.form['link'])
@@ -205,11 +205,11 @@ def upload():
 		if songName is None:
 			songName = filename
 		
-		# #if deploying on AWS, only .wav is supported
-		filename = filename.replace(".mp3", ".wav")
-		filepath = filepath.replace(".mp3", ".wav")
-		filename = filename.replace(".webm", ".wav")
-		filepath = filepath.replace(".webm", ".wav")
+		# # #if deploying on AWS, only .wav is supported
+		# filename = filename.replace(".mp3", ".wav")
+		# filepath = filepath.replace(".mp3", ".wav")
+		# filename = filename.replace(".webm", ".wav")
+		# filepath = filepath.replace(".webm", ".wav")
 	
 		return render_template('convert.html', tempo=original_BPM, filename=filename, filepath=filepath, songName=songName)
 	return
@@ -220,75 +220,76 @@ def my_hook(d):
 
 def downloadLink(link):
 	# FOR LOCAL UPLOADS
-	# ydl_opts = {
-	# 	'format': 'bestaudio/mp3',       
-   	# 	'noplaylist' : True,        
-    # 	'progress_hooks': [my_hook],
-	# 	'postprocessors': [{
-	# 		'key': 'FFmpegExtractAudio',
-	# 		'preferredcodec': 'mp3',
-	# 		'preferredquality': '192',
-	# 	}],
-	# 	'outtmpl': os.path.join(application.config['upload_folder'], '%(title)s.%(ext)s')
-	# }
-	# try:
-	# 	with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-	# 		ydl.download([link])
-	# 		result = ydl.extract_info(link, download=False)
-	# 		unsecure_filename = ydl.prepare_filename(result)
-	# except:
-	# 	return None, None
-	
-	# #output from ydl
-	# unsecure_filepath = unsecure_filename.replace('.webm', '.mp3')
-	# unsecure_filename = unsecure_filename.replace('uploads\\', '')
-
-	# print(unsecure_filename, unsecure_filepath)
-	# print(os.path.isfile(unsecure_filepath))
-
-
-	# #video title may have illegal characters
-	# secure_fileName = secure_filename(unsecure_filename)
-	# secure_filepath = os.path.join(application.config['upload_folder'], secure_fileName)
-
-	# #rename with secure filepath
-	# try:
-	# 	os.rename(unsecure_filepath, secure_filepath)
-	# except: #if file already exists, remove it and add it again
-	# 	os.remove(secure_filepath)
-	# 	os.rename(unsecure_filepath, secure_filepath)
-
-	# # FOR s3 UPLOADS
 	ydl_opts = {
-		'format': 'webm',       
-
+		'format': 'bestaudio/mp3',       
+   		'noplaylist' : True,        
+    	'progress_hooks': [my_hook],
+		'postprocessors': [{
+			'key': 'FFmpegExtractAudio',
+			'preferredcodec': 'mp3',
+			'preferredquality': '192',
+		}],
+		'outtmpl': os.path.join(application.config['upload_folder'], '%(title)s.%(ext)s')
 	}
 	try:
-		cmd = "youtube-dl -f 251 " + link + " -o -"
-		print(cmd)
-		proc = utility.Popen([cmd], stdout=utility.PIPE, shell = True)
-		output, _ = proc.communicate()
 		with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+			ydl.download([link])
 			result = ydl.extract_info(link, download=False)
-			yt_filename = secure_filename(ydl.prepare_filename(result))
-	except Exception as e:
-		print("An Error Occured: ", e)
+			unsecure_filename = ydl.prepare_filename(result)
+	except:
 		return None, None
 	
+	#output from ydl
+	unsecure_filepath = unsecure_filename.replace('.webm', '.mp3')
+	unsecure_filename = unsecure_filename.replace('uploads\\', '')
 
-	filename, filetype = os.path.split(yt_filename)
-	#if filename is already in the bucket, append "_new" to the end
-	s3_files = [file["Key"] for file in s3.list_objects(Bucket=bucket_name)["Contents"]]
-	while (filename + filetype) in s3_files:
-		filename += "_new"
+	print(unsecure_filename, unsecure_filepath)
+	print(os.path.isfile(unsecure_filepath))
 
-	yt_filename = filename + filetype
-	print(yt_filename)
 
-	yt_filepath = utility.upload_bytes_to_s3(io.BytesIO(output), yt_filename, bucket_name)
-	print(yt_filepath)
+	#video title may have illegal characters
+	secure_fileName = secure_filename(unsecure_filename)
+	secure_filepath = os.path.join(application.config['upload_folder'], secure_fileName)
 
-	return yt_filename, yt_filepath
+	#rename with secure filepath
+	try:
+		os.rename(unsecure_filepath, secure_filepath)
+	except: #if file already exists, remove it and add it again
+		os.remove(secure_filepath)
+		os.rename(unsecure_filepath, secure_filepath)
+	return secure_fileName, secure_filepath
+
+	# # FOR s3 UPLOADS
+	# ydl_opts = {
+	# 	'format': 'webm',       
+
+	# }
+	# try:
+	# 	cmd = "youtube-dl -f 251 " + link + " -o -"
+	# 	print(cmd)
+	# 	proc = utility.Popen([cmd], stdout=utility.PIPE, shell = True)
+	# 	output, _ = proc.communicate()
+	# 	with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+	# 		result = ydl.extract_info(link, download=False)
+	# 		yt_filename = secure_filename(ydl.prepare_filename(result))
+	# except Exception as e:
+	# 	print("An Error Occured: ", e)
+	# 	return None, None
+	
+
+	# filename, filetype = os.path.split(yt_filename)
+	# #if filename is already in the bucket, append "_new" to the end
+	# s3_files = [file["Key"] for file in s3.list_objects(Bucket=bucket_name)["Contents"]]
+	# while (filename + filetype) in s3_files:
+	# 	filename += "_new"
+
+	# yt_filename = filename + filetype
+	# print(yt_filename)
+
+	# yt_filepath = utility.upload_bytes_to_s3(io.BytesIO(output), yt_filename, bucket_name)
+	# print(yt_filepath)
+
+	# return yt_filename, yt_filepath
 
 def dataFromJSON(JSONstring, key):
 	JSONDict = json.loads(JSONstring)
@@ -310,25 +311,25 @@ def main():
 			print(session['songCounter'])
 		return render_template('upload.html')
 
-def upload_file_to_s3(file, bucket_name, acl="public-read"):
-	try:
+# def upload_file_to_s3(file, bucket_name, acl="public-read"):
+# 	try:
 
-		s3.upload_fileobj(
-			file,
-			bucket_name,
-			file.filename,
-			ExtraArgs={
-				"ACL": acl,
-				"ContentType": file.content_type
-			}
-		)
+# 		s3.upload_fileobj(
+# 			file,
+# 			bucket_name,
+# 			file.filename,
+# 			ExtraArgs={
+# 				"ACL": acl,
+# 				"ContentType": file.content_type
+# 			}
+# 		)
 
-	except Exception as e:
-		# This is a catch all exception, edit this part to fit your needs.
-		print("Something Happened: ", e)
-		return e
+# 	except Exception as e:
+# 		# This is a catch all exception, edit this part to fit your needs.
+# 		print("Something Happened: ", e)
+# 		return e
 
-	return "{}{}".format(application.config["S3_LOCATION"], file.filename)
+# 	return "{}{}".format(application.config["S3_LOCATION"], file.filename)
 
 if __name__ == '__main__':
     application.run(host='0.0.0.0', debug=True)

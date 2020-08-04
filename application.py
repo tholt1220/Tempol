@@ -138,17 +138,6 @@ def render_playlist():
 def uploaded_file(filename):
 	return send_from_directory(application.config['upload_folder'], filename)
 
-@application.route('/tempo',methods =['GET', 'POST'])
-def tempo():
-	if request.method == 'POST':
-		print('Incoming..')
-		print(request.get_data())
-		filename = dataFromJSON(request.get_data(), 'filename')
-		return filename, 200
-	else: #request is a get
-		message = {'greeting': 'Hello from flask!'}
-		return jsonify(message)
-
 @application.route('/error')
 def error():
 	print("ERROR")

@@ -39,7 +39,7 @@ If running on local machine, all file uploads will be directed to the folder ./u
   
     Upload file, calculate tempo, render template to display calculated tempo
     * Parameters: trackNumber
-    * Return: rendered template for `convert.html
+    * Return: rendered template for `convert.html`
 
 
 ### `/playlistCRUD`
@@ -64,7 +64,7 @@ If running on local machine, all file uploads will be directed to the folder ./u
     * Parameters: song ID
     * Return: a json object of the current playlist
     
-  * Delete
+  * DELETE
   
     Delete a song that's already in the playlist
     * Parameters: song ID

@@ -5,9 +5,9 @@ import sys
 import ffmpeg
 import ntpath
 
-# import soundfile as sf
-# import io
-# from urllib.request import urlopen
+import soundfile as sf
+import io
+from urllib.request import urlopen
 
 # from application import s3, application
 # from subprocess import Popen, PIPE
@@ -36,7 +36,7 @@ else:
 # bucket_name = application.config["S3_BUCKET"]
 
 
-def calcluateBPM(src):
+def calculateBPMFromFile(src):
 	#soundfile only supports .wav
 	#SO convert .mp3 to .wav using ffmpeg
 	# src_filename, src_filetype = os.path.splitext(src)
@@ -86,6 +86,53 @@ def calcluateBPM(src):
 	# # 4. Convert the frame indices of beat events into timestamps
 	# beat_times = librosa.frames_to_time(beat_frames, sr=sr)
 	# print(beat_times)
+
+def calculateBPMFromBytes(audio_stream):
+	#soundfile only supports .wav
+	#SO convert .mp3 to .wav using ffmpeg
+	# src_filename, src_filetype = os.path.splitext(src)
+	# if src_filetype == '.mp3' or src_filetype ==".webm":
+	# 	print("mp3 to wav:")
+	# 	output, _ = (
+	# 		ffmpeg.input(src)
+	# 		.output('pipe:', format='wav')
+	# 		.run(capture_stdout=True)
+	# 	)
+
+	# 	#upload .wav to s3 bucket
+	# 	filename = ntpath.basename(src_filename) + ".wav"
+	# 	print("uploading " + filename)
+	# 	src = upload_bytes_to_s3(io.BytesIO(output), filename, bucket_name)
+
+	# 	#delete .mp3 or .wav file from s3 bucket
+	# 	src_filename = filename.replace(".wav", src_filetype)
+	# 	delete_from_s3(src_filename, bucket_name)
+
+	
+	try:
+		# #read from s3 URL
+		# audio_stream = io.BytesIO(urlopen(src).read())
+		audio_stream.seek(0)
+		y, sr = sf.read(audio_stream)
+		#soundfile may return shape (n,2), but librosa expects (n,)
+		if(y.shape[1] > 1):
+			#to_mono: (2,n) -> (n,)
+			y = librosa.to_mono(y.transpose())
+
+	except Exception as e :
+		print("Unable to find file")
+		print(e)
+		return 0
+
+	# 3. Run the default beat tracker
+	# print("Calculating original tempo...")
+	original_tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+
+	# print('Estimated tempo: {:.2f} beats per minute'.format(original_tempo))
+	return original_tempo
+	# # 4. Convert the frame indices of beat events into timestamps
+	# beat_times = librosa.frames_to_time(beat_frames, sr=sr)
+	# print(beat_times)	
 
 def floatToString(f): #replace decimal point with underscore. If whole number, return only whole num
 	if f - int(f) == 0:

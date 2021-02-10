@@ -2,7 +2,7 @@ flask
 werkzeug
 youtube_dl
 gunicorn
-librosa==0.6.1
+librosa
 pydub
 ffmpeg-python
 llvmlite==0.31.0
@@ -10,3 +10,4 @@ numba==0.47.0
 soundfile
 pysoundfile
 boto3
+python-dotenv

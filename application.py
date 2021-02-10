@@ -7,8 +7,8 @@ import ntpath
 import json
 import youtube_dl
 
-import boto3
-from config import S3_KEY, S3_SECRET, S3_BUCKET
+# import boto3
+# from config import S3_KEY, S3_SECRET, S3_BUCKET
 from contextlib import redirect_stdout
 import io
 
@@ -124,10 +124,6 @@ def deleteFile(filename):
 		os.remove(filename)
 	except:
 		print("unable to remove ")
-	
-	
-
-
 #END DB CRUD OPERATIONS
 
 @application.route('/playlist', methods = ['GET'])
@@ -321,4 +317,4 @@ def main():
 # 	return "{}{}".format(application.config["S3_LOCATION"], file.filename)
 
 if __name__ == '__main__':
-    application.run(host='0.0.0.0', debug=True)
+    application.run(debug=True)
